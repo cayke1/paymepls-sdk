@@ -1,11 +1,15 @@
 {
   "name": "paymepls-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc"
   },
-  "keywords": ["paymepls", "api-wrapper", "sdk"],
+  "keywords": [
+    "paymepls",
+    "api-wrapper",
+    "sdk"
+  ],
   "author": "Cayke Veras",
   "license": "MIT",
   "description": "Sdk to interact with paymepls api endpoints",
