@@ -1,94 +1,88 @@
 import axios, { AxiosInstance } from "axios";
+import { ICreateUser } from "./@types/user";
 import { Bill, ICreateBill, IUpdateBill } from "./@types/bill";
 import { Debtor, ICreateDebtor } from "./@types/debtor";
 import { ICreatePayment, Payment } from "./@types/payment";
-import { ICreateUser } from "./@types/user";
 
-export class Paymepls {
-  private api: AxiosInstance;
-
-  constructor() {
-    this.api = axios.create({
-      baseURL: "https://api.caykedev.com",
-    });
-  }
-  public setToken = (token: string) => {
-    this.api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  };
-
-  async login(email: string, password: string) {
-    const response = await this.api.post("/login", {
-      email,
-      password,
-    });
-
-    return response.data;
-  }
-
-  async register(body: ICreateUser) {
-    const response = await this.api.post("/signup", body);
-
-    return response.data;
-  }
-
-  async verify() {
-    if (!this.api.defaults.headers.common["Authorization"]) {
-      throw new Error("No token provided");
+export class PayMeSDK {
+    private api: AxiosInstance;
+  
+    constructor(baseURL: string = "https://api.caykedev.com", token?: string) {
+      this.api = axios.create({ baseURL });
+  
+      if (token) {
+        this.setToken(token);
+      }
     }
-    const response = await this.api.get("/verify");
-
-    return response.data;
+  
+    public setToken = (token: string) => {
+      this.api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    };
+  
+    public clearToken = () => {
+      delete this.api.defaults.headers.common["Authorization"];
+    };
+  
+    private async request<T>(fn: () => Promise<T>): Promise<T> {
+      try {
+        return await fn();
+      } catch (error: any) {
+        if (error.response) {
+          throw new Error(`API Error (${error.response.status}): ${error.response.data.message || "Unknown error"}`);
+        }
+        throw new Error("Network Error: Unable to reach API");
+      }
+    }
+  
+    // Auth
+    public auth = {
+      login: (email: string, password: string) =>
+        this.request(() => this.api.post("/login", { email, password }).then(res => res.data)),
+  
+      register: (body: ICreateUser) =>
+        this.request(() => this.api.post("/signup", body).then(res => res.data)),
+  
+      verify: () =>
+        this.request(() => this.api.get("/verify").then(res => res.data)),
+    };
+  
+    // Bills
+    public bills = {
+      getAll: (): Promise<Bill[]> =>
+        this.request(() => this.api.get("/bill").then(res => res.data)),
+  
+      create: (body: ICreateBill): Promise<Bill> =>
+        this.request(() => this.api.post("/bill", body).then(res => res.data)),
+  
+      update: (id: string, body: IUpdateBill): Promise<Bill> =>
+        this.request(() => this.api.put(`/bill/${id}`, body).then(res => res.data)),
+    };
+  
+    // Debtors
+    public debtors = {
+      getAll: (): Promise<Debtor[]> =>
+        this.request(() => this.api.get("/debtor").then(res => res.data)),
+  
+      create: (body: ICreateDebtor): Promise<Debtor> =>
+        this.request(() => this.api.post("/debtor", body).then(res => res.data)),
+  
+      delete: (id: string): Promise<void> =>
+        this.request(() => this.api.delete(`/debtor/${id}`)),
+    };
+  
+    // Payments
+    public payments = {
+      getAll: (): Promise<Payment[]> =>
+        this.request(() => this.api.get("/payment").then(res => res.data)),
+  
+      getFromDebtor: (debtorId: string): Promise<Payment[]> =>
+        this.request(() => this.api.get(`/payment/debtor/${debtorId}`).then(res => res.data)),
+  
+      create: (body: ICreatePayment): Promise<Payment> =>
+        this.request(() => this.api.post("/payment", body).then(res => res.data)),
+  
+      delete: (id: string): Promise<void> =>
+        this.request(() => this.api.delete(`/payment/${id}`)),
+    };
   }
-
-  // Bills
-  async getBills(): Promise<Bill[]> {
-    const response = await this.api.get("/bill");
-
-    return response.data;
-  }
-
-  async createBill(body: ICreateBill): Promise<Bill> {
-    const response = await this.api.post("/bill", body);
-    return response.data;
-  }
-
-  async updateBill(id: string, body: IUpdateBill): Promise<Bill> {
-    const response = await this.api.put(`/bill/${id}`, body);
-    return response.data;
-  }
-
-  // Debtors
-  async getDebtors(): Promise<Debtor[]> {
-    const response = await this.api.get("/debtor");
-    return response.data;
-  }
-
-  async createDebtor(body: ICreateDebtor): Promise<Debtor> {
-    const response = await this.api.post("/debtor", body);
-    return response.data;
-  }
-
-  async deleteDebtor(id: string): Promise<void> {
-    await this.api.delete(`/debtor/${id}`);
-  }
-
-  // Payments
-  async getPayments(): Promise<Payment[]> {
-    const response = await this.api.get("/payment");
-    return response.data;
-  }
-
-  async getPaymentFromDebtor(debtorId: string): Promise<Payment[]> {
-    const response = await this.api.get(`/payment/debtor/${debtorId}`);
-    return response.data;
-  }
-
-  async createPayment(body: ICreatePayment): Promise<Payment> {
-    const response = await this.api.post("/payment", body);
-    return response.data;
-  }
-
-  async deletePayment(id: string): Promise<void> {
-    await this.api.delete(`/payment/${id}`);
-  }
-}
+  
