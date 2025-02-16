@@ -1,14 +1,14 @@
 {
   "name": "paymepls-sdk",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["paymepls", "api-wrapper", "sdk"],
+  "author": "Cayke Veras",
+  "license": "MIT",
+  "description": "Sdk to interact with paymepls api endpoints",
   "devDependencies": {
     "typescript": "^5.7.3"
   },
