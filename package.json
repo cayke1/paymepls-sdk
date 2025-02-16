@@ -10,6 +10,10 @@
     "api-wrapper",
     "sdk"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cayke1/paymepls-sdk.git"
+  },
   "author": "Cayke Veras",
   "license": "MIT",
   "description": "Sdk to interact with paymepls api endpoints",
